@@ -54,7 +54,8 @@ def run_init():
     global _did_run_init
     if _did_run_init:
         return
-    jax.distributed.initialize()
+    if jax.default_backend() != "gpu":
+        jax.distributed.initialize()
     _did_run_init = True
 
 
