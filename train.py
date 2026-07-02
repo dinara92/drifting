@@ -274,7 +274,13 @@ def train_gen(
             init_from=init_from,
             hf_cache_dir=HF_ROOT,
         )
-    gen_step_jit = jax.jit(partial(generate_step, apply_fn=state.apply_fn, postprocess_fn=postprocess_fn))
+    # gen_step_jit = jax.jit(partial(generate_step, apply_fn=state.apply_fn, postprocess_fn=postprocess_fn))
+    # Keep VAE decode (postprocess_fn) outside JIT to avoid embedding its params
+    # as MLIR constants, which fails on Blackwell with PjRtDevice not found.
+    _gen_latents_jit = jax.jit(partial(generate_step, apply_fn=state.apply_fn, postprocess_fn=lambda x: x))
+    def gen_step_jit(batch, **kwargs):
+        latents = _gen_latents_jit(batch, **kwargs)
+        return postprocess_fn(latents)
     assert feature_params is not None, "feature_params must be provided for multi-host safe feature extraction"
     loss_kwargs['R_list'] = tuple(loss_kwargs['R_list'])
     state_sharding = jax.tree.map(lambda x: x.sharding, state)

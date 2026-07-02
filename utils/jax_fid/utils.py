@@ -10,7 +10,7 @@ import pickle
 def download(url, target_md5):
     # name = url[url.rfind('/') + 1 : url.rfind('?')]
     # cache file dir
-    cache_path = '/tmp/inception_params.pkl'
+    cache_path = '/playpen-shared/dinara/inception_params.pkl'
     if os.path.exists(cache_path):
         return pickle.load(open(cache_path, 'rb'))
     

@@ -10,7 +10,7 @@ from dataclasses import dataclass
 from functools import partial
 from pathlib import Path
 
-os.environ.setdefault("JAX_PLATFORMS", "tpu,cpu")
+os.environ.setdefault("JAX_PLATFORMS", "cuda,cpu")
 
 import jax
 import jax.numpy as jnp
@@ -108,7 +108,7 @@ def create_cached_dataset(
     from dataset.vae import vae_enc_decode
     from utils.hsdp_util import set_global_mesh
 
-    local_tpu_devices = jax.local_devices(backend="tpu")
+    local_tpu_devices = jax.local_devices(backend="cuda")
     n_local_devices = max(1, len(local_tpu_devices))
 
     if local_batch_size % n_local_devices != 0:
